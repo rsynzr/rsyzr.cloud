@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>ACCESS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --bg: #0d0f12;
+  --panel: #14171c;
+  --border: #2a2f38;
+  --text: #e6e6e6;
+  --muted: #8a8f98;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, monospace;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+/* STAR BACKGROUND */
+.stars {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1px 1px at 10% 20%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 30% 80%, #aaa 50%, transparent 51%),
+    radial-gradient(1px 1px at 50% 40%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 10%, #999 50%, transparent 51%),
+    radial-gradient(1px 1px at 90% 70%, #fff 50%, transparent 51%);
+  background-size: 200px 200px;
+  animation: moveStars 120s linear infinite;
+  opacity: 0.4;
+}
+
+@keyframes moveStars {
+  from { transform: translateY(0); }
+  to   { transform: translateY(200px); }
+}
+
+/* PANEL */
+.panel {
+  position: relative;
+  z-index: 1;
+  background: var(--panel);
+  padding: 32px;
+  width: 300px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.title {
+  font-size: 32px;
+  letter-spacing: 4px;
+  margin-bottom: 24px;
+}
+
+/* INPUT */
+input {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--text);
+}
+
+/* BUTTON */
+button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--text);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* TIMER */
+#timer {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<div class="stars"></div>
+
+<div class="panel">
+  <div class="title">INK</div>
+
+  <input type="text" id="codeInput" autocomplete="off">
+
+  <button id="submitBtn" onclick="submitCode()">SUBMIT</button>
+
+  <div id="timer"></div>
+</div>
+
+<script>
+const CORRECT_CODE = "raditganteng";
+const COOLDOWN_TIME = 15;
+const REDIRECT_URL =
+  "https://chat.whatsapp.com/GVjoA71Tum8CuuboPTEFGk?mode=gi_t";
+
+let locked = false;
+let remaining = 0;
+let intervalId = null;
+
+function submitCode() {
+  if (locked) return;
+
+  const input = document.getElementById("codeInput").value.trim();
+
+  if (input === CORRECT_CODE) {
+    window.location.href = REDIRECT_URL;
+  } else {
+    startCooldown();
+  }
+}
+
+function startCooldown() {
+  locked = true;
+  remaining = COOLDOWN_TIME;
+
+  const btn = document.getElementById("submitBtn");
+  const timer = document.getElementById("timer");
+
+  btn.disabled = true;
+  timer.textContent = "WAIT " + remaining + "s";
+
+  intervalId = setInterval(() => {
+    remaining--;
+    timer.textContent = "WAIT " + remaining + "s";
+
+    if (remaining <= 0) {
+      clearInterval(intervalId);
+      locked = false;
+      btn.disabled = false;
+      timer.textContent = "";
+    }
+  }, 1000);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>INK</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: monospace;
+      background: #000000;
+      color: #ffffff;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      letter-spacing: 4px;
+      font-size: 32px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      background: #0a0a0a;
+      color: #ffffff;
+      border: 1px solid #222;
+      padding: 12px;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      resize: none;
+    }
+
+    button {
+      background: #111;
+      color: #fff;
+      border: 1px solid #222;
+      padding: 8px 14px;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1a1a1a;
+    }
+  </style>
+</head>
+<body>
+
+<h1>INK</h1>
+
+<textarea id="input" placeholder="INPUT"></textarea>
+
+<button onclick="encode()">ENCODE</button>
+<button onclick="decode()">DECODE</button>
+
+<textarea id="output" placeholder="OUTPUT"></textarea>
+
+<script>
+  const vokalMap = {
+    'a':'i','i':'u','u':'e','e':'o','o':'a',
+    'A':'I','I':'U','U':'E','E':'O','O':'A'
+  };
+
+  const reverseVokalMap = {};
+  for (let k in vokalMap) {
+    reverseVokalMap[vokalMap[k]] = k;
+  }
+
+  function encode() {
+    const text = document.getElementById("input").value;
+    let result = "";
+
+    text.split(" ").forEach(word => {
+      let out = "";
+      for (let c of word) {
+        out += vokalMap[c] || c;
+      }
+      result += "ka" + out + " ";
+    });
+
+    document.getElementById("output").value = result.trim();
+  }
+
+  function decode() {
+    const text = document.getElementById("input").value;
+    let result = "";
+
+    text.split(" ").forEach(word => {
+      if (word.startsWith("ka")) {
+        word = word.slice(2);
+      }
+      let out = "";
+      for (let c of word) {
+        out += reverseVokalMap[c] || c;
+      }
+      result += out + " ";
+    });
+
+    document.getElementById("output").value = result.trim();
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>INK</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 30px;
+      background: #000;
+      color: #fff;
+      font-family: monospace;
+    }
+
+    h1 {
+      letter-spacing: 4px;
+      margin-bottom: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: #0a0a0a;
+      color: #fff;
+      border: 1px solid #222;
+      padding: 10px;
+      margin-bottom: 12px;
+    }
+
+    textarea {
+      height: 140px;
+      resize: none;
+    }
+
+    button {
+      background: #111;
+      color: #fff;
+      border: 1px solid #222;
+      padding: 8px 14px;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1a1a1a;
+    }
+  </style>
+</head>
+<body>
+
+<h1>INK</h1>
+
+<input id="password" type="password" placeholder="KEY">
+
+<textarea id="input" placeholder="INPUT"></textarea>
+
+<button onclick="encrypt()">ENCRYPT</button>
+<button onclick="decrypt()">DECRYPT</button>
+
+<textarea id="output" placeholder="OUTPUT"></textarea>
+
+<script>
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+
+  async function getKey(password, salt) {
+    const baseKey = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(password),
+      "PBKDF2",
+      false,
+      ["deriveKey"]
+    );
+
+    return crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: salt,
+        iterations: 100000,
+        hash: "SHA-256"
+      },
+      baseKey,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["encrypt", "decrypt"]
+    );
+  }
+
+  async function encrypt() {
+    const text = document.getElementById("input").value;
+    const password = document.getElementById("password").value;
+    if (!text || !password) return;
+
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const key = await getKey(password, salt);
+
+    const encrypted = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      key,
+      enc.encode(text)
+    );
+
+    const combined = new Uint8Array([
+      ...salt,
+      ...iv,
+      ...new Uint8Array(encrypted)
+    ]);
+
+    document.getElementById("output").value =
+      btoa(String.fromCharCode(...combined));
+  }
+
+  async function decrypt() {
+    const data = document.getElementById("input").value;
+    const password = document.getElementById("password").value;
+    if (!data || !password) return;
+
+    try {
+      const bytes = Uint8Array.from(atob(data), c => c.charCodeAt(0));
+      const salt = bytes.slice(0, 16);
+      const iv = bytes.slice(16, 28);
+      const encrypted = bytes.slice(28);
+
+      const key = await getKey(password, salt);
+
+      const decrypted = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        encrypted
+      );
+
+      document.getElementById("output").value =
+        dec.decode(decrypted);
+    } catch {
+      document.getElementById("output").value = "";
+    }
+  }
+</script>
+
+</body>
+</html>
